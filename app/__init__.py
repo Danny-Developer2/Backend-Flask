@@ -5,26 +5,16 @@ from app.extensions import db, migrate, login_manager
 from flask_jwt_extended import JWTManager
 from flask_swagger_ui import get_swaggerui_blueprint
 
-
 def create_app():
     app = Flask(__name__)
     
-    # Database configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SECRET_KEY'] = 'tu-clave-secreta-aqui'
-    
-    # JWT configuration
-    app.config['JWT_TOKEN_LOCATION'] = ['cookies']
-    app.config['JWT_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = True
-    app.config['JWT_CSRF_CHECK_FORM'] = True
-    app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+    # Load configuration from config.py
+    app.config.from_object('config.Config')
     
     # Initialize JWT
     jwt = JWTManager(app)
     
+    # Swagger UI configuration
     SWAGGER_URL = '/api/docs'
     API_URL = '/static/swagger.json'
     swaggerui_blueprint = get_swaggerui_blueprint(
@@ -36,8 +26,6 @@ def create_app():
     )
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     
-    
-    
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
@@ -46,7 +34,7 @@ def create_app():
     # Configure login_manager
     login_manager.login_view = 'web.login'
     login_manager.login_message = 'Por favor inicia sesión para acceder a esta página'
-    login_manager.login_message_category = 'warning' 
+    login_manager.login_message_category = 'warning'
     
     @login_manager.user_loader
     def load_user(user_id):
@@ -66,5 +54,14 @@ def create_app():
             return {'message': 'API funcionando!'}
     
     api.add_resource(ExampleResource, '/api/example')
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        return {'error': 'Resource not found'}, 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        return {'error': 'Internal server error'}, 500
     
     return app
