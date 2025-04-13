@@ -1,0 +1,249 @@
+{% extends "layouts/base.html" %}
+{% block title %}Collections List{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="h4 mb-0">Datos de Cobranza</h3>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#importModal">
+        <i class="bi bi-file-earmark-excel me-1"></i>Importar Excel
+      </button>
+      <button id="copyDataBtn" class="btn btn-primary" onclick="copyCollectionData()">
+        <i class="bi bi-clipboard me-1"></i>Copiar Datos
+      </button>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        <i class="bi bi-trash me-1"></i>Eliminar Todo
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table id="collectionTable" class="table table-striped table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID Cliente</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+            <th>Vencimiento</th>
+            <th>Monto</th>
+            <th>Mora</th>
+            <th>Estatus</th>
+            <th>Última Gestión</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if collections %}
+            {% for collection in collections %}
+            <tr>
+              <td>{{ collection.client_id }}</td>
+              <td>{{ collection.client_name }}</td>
+              <td>{{ collection.phone }}</td>
+              <td>{{ collection.email }}</td>
+              <td>{{ collection.due_date.strftime('%d/%m/%Y') if collection.due_date }}</td>
+              <td>{{ "${:,.2f}".format(collection.amount|float) }}</td>
+              <td>{{ collection.days_overdue }}</td>
+              <td><span class="badge {{ collection.status|lower|replace(' ', '-') }}">{{ collection.status }}</span></td>
+              <td>{{ collection.last_management.strftime('%d/%m/%Y') if collection.last_management }}</td>
+              <td><small class="text-muted">{{ collection.observations }}</small></td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="10" class="text-center py-4">
+                <div class="text-muted">
+                  <i class="bi bi-inbox-fill h4"></i>
+                  <p class="mb-0">No hay datos de cobranza disponibles</p>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-file-earmark-excel me-2"></i>
+          Importar Datos de Cobranza
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="importForm">
+          <div class="mb-3">
+            <label for="excelFile" class="form-label">Seleccionar Archivo Excel</label>
+            <input type="file" class="form-control" id="excelFile" accept=".xlsx, .xls" required>
+            <div class="form-text">
+              <i class="bi bi-info-circle me-1"></i>
+              El archivo debe contener los datos de cobranza en el formato especificado
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-success" onclick="importExcel()">
+          <i class="bi bi-upload me-1"></i>Importar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+          Confirmar Eliminación
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro que deseas eliminar todos los registros de cobranza? Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="bi bi-x-circle me-1"></i>Cancelar
+        </button>
+        <button type="button" class="btn btn-danger" onclick="deleteAllCollections()">
+          <i class="bi bi-trash me-1"></i>Eliminar Todo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+function importExcel() {
+    const fileInput = document.getElementById('excelFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        showErrorAlert('Por favor selecciona un archivo primero');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                raw: false,
+                dateNF: 'yyyy-mm-dd'
+            });
+            
+            fetch('{{ url_for("web.collections_import") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
+                    showSuccessAlert('Datos importados exitosamente');
+                    location.reload();
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                showErrorAlert('Error al guardar los datos: ' + error.message);
+            });
+        } catch (error) {
+            console.error('Import error:', error);
+            showErrorAlert('Error al procesar el archivo Excel');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function deleteAllCollections() {
+    fetch('{{ url_for("web.collections_delete_all") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showSuccessAlert('Todos los registros han sido eliminados');
+            location.reload();
+        } else {
+            throw new Error(data.message);
+        }
+    })
+    .catch(error => {
+        showErrorAlert('Error al eliminar los registros: ' + error.message);
+    });
+}
+
+function copyCollectionData() {
+    const table = document.getElementById('collectionTable');
+    const rows = Array.from(table.querySelectorAll('tr'));
+
+    let excelContent = rows.map(row => {
+        return Array.from(row.cells)
+            .map(cell => {
+                let text = cell.textContent.trim().replace(/,/g, '');
+                if (/[\r\n\t]/.test(text)) {
+                    text = `"${text}"`;
+                }
+                return text;
+            })
+            .join('\t');
+    }).join('\r\n');
+
+    navigator.clipboard.writeText(excelContent)
+        .then(() => {
+            showSuccessAlert('Datos copiados al portapapeles');
+        })
+        .catch(() => {
+            showErrorAlert('Error al copiar los datos');
+        });
+}
+
+function showSuccessAlert(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="bi bi-check-circle me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('.table-responsive'));
+}
+
+function showErrorAlert(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-circle me-2"></i>${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('.table-responsive'));
+}
+</script>
+{% endblock %}

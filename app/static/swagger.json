@@ -1,0 +1,194 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Backend Flask API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/users": {
+            "get": {
+                "summary": "Get all users",
+                "responses": {
+                    "200": {
+                        "description": "Returns all users"
+                    }
+                }
+            }
+        },
+        "/users/add": {
+            "get": {
+                "summary": "Show add user form",
+                "responses": {
+                    "200": {
+                        "description": "Returns add user form"
+                    }
+                }
+            }
+        },
+        "/users/create": {
+            "post": {
+                "summary": "Create a new user",
+                "responses": {
+                    "200": {
+                        "description": "User created successfully"
+                    },
+                    "400": {
+                        "description": "Error creating user"
+                    }
+                }
+            }
+        },
+        "/users/{id}/edit": {
+            "get": {
+                "summary": "Show edit user form",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns edit user form"
+                    }
+                }
+            }
+        },
+        "/users/{id}/update": {
+            "post": {
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User updated successfully"
+                    },
+                    "400": {
+                        "description": "Error updating user"
+                    }
+                }
+            }
+        },
+        "/users/{id}/delete": {
+            "post": {
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deleted successfully"
+                    },
+                    "400": {
+                        "description": "Error deleting user"
+                    }
+                }
+            }
+        },
+        "/collections/import": {
+            "get": {
+                "summary": "Show collections list",
+                "responses": {
+                    "200": {
+                        "description": "Returns collections list"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Import collections data",
+                "responses": {
+                    "200": {
+                        "description": "Data imported successfully"
+                    },
+                    "400": {
+                        "description": "Error importing data"
+                    }
+                }
+            }
+        },
+        "/collections/delete-all": {
+            "post": {
+                "summary": "Delete all collections",
+                "responses": {
+                    "200": {
+                        "description": "All records deleted successfully"
+                    },
+                    "400": {
+                        "description": "Error deleting records"
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "Show login form",
+                "responses": {
+                    "200": {
+                        "description": "Returns login form"
+                    }
+                }
+            },
+            "post": {
+                "summary": "User login",
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "400": {
+                        "description": "Login error"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "get": {
+                "summary": "User logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful"
+                    }
+                }
+            }
+        },
+        "/register": {
+            "get": {
+                "summary": "Show registration form",
+                "responses": {
+                    "200": {
+                        "description": "Returns registration form"
+                    }
+                }
+            },
+            "post": {
+                "summary": "Register new user",
+                "responses": {
+                    "200": {
+                        "description": "User registered successfully"
+                    },
+                    "400": {
+                        "description": "Registration error"
+                    }
+                }
+            }
+        }
+    }
+}

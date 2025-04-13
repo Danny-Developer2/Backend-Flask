@@ -1,0 +1,81 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Add User{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Add New User</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('web.users_create') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" required 
+                       pattern="[a-zA-Z0-9_]{3,80}" title="Username must be 3-80 characters and alphanumeric">
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="first_name" class="form-label">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name">
+            </div>
+
+            <div class="mb-3">
+                <label for="last_name" class="form-label">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name">
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" checked>
+                <label class="form-check-label" for="is_active">Active</label>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('web.users_list') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create User</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value,
+        is_active: document.getElementById('is_active').checked
+    };
+
+    fetch('{{ url_for("web.users_create") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = '{{ url_for("web.users_list") }}';
+        } else {
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while creating the user');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,151 @@
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Updated button styles */
+.btn-group-sm > .btn {
+    margin: 0;
+    border-radius: 0.25rem;
+}
+
+.btn-group-sm > .btn:not(:last-child) {
+    margin-right: 0.5rem;
+}
+
+/* Hover effects for buttons */
+.btn-warning:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.btn-danger:hover {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-group-sm > .btn:not(:last-child) {
+        margin-right: 0.25rem;
+    }
+}
+
+/* Common table styles for both users and collections */
+.table {
+    font-size: 0.9rem;
+}
+
+.table th {
+    white-space: nowrap;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Status badges for both tables */
+.badge.active {
+    background-color: #198754;
+    color: #fff;
+}
+
+.badge.inactive {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+
+/* Collection status badges */
+.badge.pendiente {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge.pagado {
+    background-color: #198754;
+    color: #fff;
+}
+
+.badge.vencido {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge.en-proceso {
+    background-color: #0dcaf0;
+    color: #000;
+}
+
+.badge.cuenta-cancelada {
+    background-color: #6c757d;  /* Gray color for cancelled accounts */
+    color: #fff;
+}
+
+.badge.promesa-de-pago {
+    background-color: #8540f5;  /* Purple color for payment promises */
+    color: #fff;
+}
+
+.badge.no-localizado {
+    background-color: #fd7e14;  /* Orange color for not located */
+    color: #fff;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.navbar {
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-item {
+    margin: 0 0.25rem;
+}
+
+.navbar-toggler {
+    border: none;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+/* Rest of your existing styles remain unchanged */
